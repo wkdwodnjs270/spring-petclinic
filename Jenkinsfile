@@ -16,7 +16,7 @@ pipeline {
         }
 
         //Maven으로 Build
-        stage('Maven Build) {
+        stage('Maven Build') {
             steps {
                 sh 'mvn -Dmaven.test.failure.ignore=true clean package'
             }
