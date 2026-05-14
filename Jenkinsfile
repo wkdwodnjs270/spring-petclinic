@@ -38,7 +38,7 @@ pipeline {
         // Docker 이미지를 Docker Hub로 Push
         stage('Docker Push')
             steps {
-                sh 'echo ${DOCKER_CRED_PSW} | docker login -u ${DOCKER_CRED_USR} --password-stdin
+                sh 'echo ${DOCKERHUB_CRED_PSW} | docker login -u ${DOCKERHUB_CRED_USR} --password-stdin'
                 sh 'docker push s4616/spring-petclinic:latest'
             }
         }
