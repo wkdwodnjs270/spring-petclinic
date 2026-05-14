@@ -5,8 +5,13 @@ pipeline {
         jdk 'JDK21'
         maven 'M3'
     }   
+
+    environment { 
+        DOCKERHUB_CRED = credentials('dockerCredential')
+    }
     
     stages {
+        // Github에서 소스코드 가져오기
         stage('Git Clone') {
             steps {
                 echo 'Git Clone'
@@ -24,10 +29,28 @@ pipeline {
         }
         
         // Docker 이미지 생성
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t spring-petclinic:$(BUILD_NUMBER} .'
+                sh 'docker tag spring-petclinic:$(BUILD_NUMBER} s4616/spring-petclinic:lastest'
+            }
+        }
         // Docker 이미지를 Docker Hub로 Push
+        stage('Docker Push')
+            steps {
+                sh 'echo ${DOCKER_CRED_PSW} | docker login -u ${DOCKER_CRED_USR} --password-stdin
+                sh 'docker push s4616/spring-petclinic:latest'
+            }
+        }
         // Docker 이미지 삭제
-        
-        
+        stage('Docker Clean') {
+            steps {
+                sh '''
+                docker rmi spring-petclinic:${BUILD_NUMBER}
+                docker rmi s4616/spring-petclinic:latest
+                '''
+            }
+        }
         // Docker Hub를 이용한 배포
         // SSH를 이용한 배포
         stage('SSH Publish') {
@@ -35,7 +58,10 @@ pipeline {
                 sshPublisher(publishers: [sshPublisherDesc(configName: 'target',
                 transfers: [sshTransfer(cleanRemote: false,
                 excludes: '',
-                execCommand: '''fuser -k 8080/tcp
+                execCommand: '''
+                docker rm -f $(docker ps -aq)
+                docker rmi $(docker images -q)
+                docker run -itd -p 80:8080 --name=spring-petclinic  s4616/spring-petclinic:latest
                 export BUILD_ID=Spring-Petclinic
                 
                 nohup java -jar /home/ubuntu/spring-petclinic-4.0.0-SNAPSHOT.jar >> nohup.out 2>&1 &''', 
