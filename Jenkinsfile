@@ -19,8 +19,16 @@ pipeline {
         stage('Maven Build') {
             steps {
                 sh 'mvn -Dmaven.test.failure.ignore=true clean package'
+        
             }
         }
+        
+        // Docker 이미지 생성
+        // Docker 이미지를 Docker Hub로 Push
+        // Docker 이미지 삭제
+        
+        
+        // Docker Hub를 이용한 배포
         // SSH를 이용한 배포
         stage('SSH Publish') {
             steps {
