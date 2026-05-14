@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools { 
+        jdk 'JDK21'
+        maven 'M3'
+    }   
+    
     stages {
         stage('Git Clone') {
             steps {
@@ -9,5 +14,12 @@ pipeline {
                 branch: 'main'
             }
         }
+
+        //Maven으로 Build
+        stage('Maven Build) {
+            steps {
+                sh 'mvn -Dmaven.test.failure.ignore=true clean package'
+            }
+        }
     }
-}
+}             
